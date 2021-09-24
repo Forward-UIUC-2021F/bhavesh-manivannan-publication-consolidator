@@ -21,3 +21,23 @@ This module includes the crawlers for the Arxiv, Google Scholar, Springer, and O
                   - https://dev.springernature.com/example-metadata-response 
                   - https://dev.springernature.com/restfuloperations 
    - Google Scholar: https://scholar.google.com/
+
+### Module Storing Latest Version of Static Knowledge Bases on Intermediary SQL Database: 
+- Input 
+  - Aminer, MAG, Arxiv databases (separate functions for each)
+- Output
+  - Updated SQL server containing the latest knowledge base data.
+- References:
+  - https://www.ijstr.org/final-print/oct2015/Query-Optimization-Techniques-Tips-For-Writing-Efficient-And-Faster-Sql-Queries.pdf 
+
+### Distributed Crawler Job Management Module:
+- Functional Description
+  - Handle each task of searching professors and going through different sources across different machines independently
+- Input 
+  - List of Crawling Tasks
+- Output
+  - Scraping information off multiple websites and sources simultaneously. Crawled Data sent to database. 
+- References:
+  - https://github.com/FS3113/Distributed-System/blob/main/daemon.go 
+  - https://iopscience.iop.org/article/10.1088/1755-1315/108/4/042086/pdf
+
