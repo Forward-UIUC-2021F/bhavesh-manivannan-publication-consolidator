@@ -41,7 +41,7 @@ This module includes the crawlers for the Arxiv, Google Scholar, Springer, and O
   - https://github.com/FS3113/Distributed-System/blob/main/daemon.go 
   - https://iopscience.iop.org/article/10.1088/1755-1315/108/4/042086/pdf
 
-### Distributed Crawler Job Management Module:
+### Utilize Edit Distance / Entity Deduplication to handle Duplicates
 - Functional Description
   - Removes duplicate entries in the publication data based on publication titles- Input 
 - Input 
