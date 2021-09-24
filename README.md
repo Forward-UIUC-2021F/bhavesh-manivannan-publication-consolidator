@@ -41,3 +41,15 @@ This module includes the crawlers for the Arxiv, Google Scholar, Springer, and O
   - https://github.com/FS3113/Distributed-System/blob/main/daemon.go 
   - https://iopscience.iop.org/article/10.1088/1755-1315/108/4/042086/pdf
 
+### Distributed Crawler Job Management Module:
+- Functional Description
+  - Removes duplicate entries in the publication data based on publication titles- Input 
+- Input 
+  - Pandas dataframe containing Publications data
+- Output
+  - Pandas dataframe containing Publications data with duplicates removed
+- References:
+  - Edit distance: https://link.springer.com/chapter/10.1007/978-981-13-0755-3_6 
+  - Entity deduplication: https://www.researchgate.net/publication/317177489_Entity_Deduplication_on_ScholarlyData 
+
+
