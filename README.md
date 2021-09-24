@@ -52,4 +52,6 @@ This module includes the crawlers for the Arxiv, Google Scholar, Springer, and O
   - Edit distance: https://link.springer.com/chapter/10.1007/978-981-13-0755-3_6 
   - Entity deduplication: https://www.researchgate.net/publication/317177489_Entity_Deduplication_on_ScholarlyData 
 
+## Algorithmic Design
+![image](https://user-images.githubusercontent.com/12843675/134738273-95163166-287b-4496-9b3e-0a0e674e414c.png)
 
