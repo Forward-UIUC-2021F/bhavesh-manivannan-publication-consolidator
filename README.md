@@ -57,4 +57,5 @@ Given an input professor and their corresponding university, we first crawl the 
 
 The Distributed Crawler module performs all of these crawling tasks simultaneously. Once the publication data is consolidated, it is passed into the “Remove Duplicates Module” where Edit Distance + Entity Deduplication is performed to remove duplicate publication data. Then, the final cleaned up publication data is sent to the website database. 
 
-![image](https://user-images.githubusercontent.com/12843675/134743341-aead2340-c4ef-4489-950d-7a18e49d7a4d.png)
+![image](https://user-images.githubusercontent.com/12843675/134743565-081cbb75-4cc9-4005-966a-0a4f49b85fde.png)
+
