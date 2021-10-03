@@ -10,7 +10,13 @@ This module includes the crawlers for the Arxiv, Google Scholar, Springer, and O
 
 
 ## Functional Design 
-### Knowledge Base Consolidator: 
+### Knowledge Base Consolidator:
+```
+def consolidate(professor, university):
+  ...
+  return { 'title': title, 'authors': authors, 'abstract': abstract, 'doi': doi, 'citations': citations }
+```
+
 - Input 
   - Professor name, university
 - Output
@@ -23,6 +29,12 @@ This module includes the crawlers for the Arxiv, Google Scholar, Springer, and O
    - Google Scholar: https://scholar.google.com/
 
 ### Module Storing Latest Version of Static Knowledge Bases on Intermediary SQL Database: 
+```
+def store_knowledge_base_intemediary_sql(knowledge_base):
+  ...
+  # Updates the SQL server with latest knowledge base data.
+```
+
 - Input 
   - Aminer, MAG, Arxiv databases (separate functions for each)
 - Output
@@ -31,6 +43,12 @@ This module includes the crawlers for the Arxiv, Google Scholar, Springer, and O
   - https://www.ijstr.org/final-print/oct2015/Query-Optimization-Techniques-Tips-For-Writing-Efficient-And-Faster-Sql-Queries.pdf 
 
 ### Distributed Crawler Job Management Module:
+```
+def distributed_crawler(crawling_tasks):
+  ...
+  return { 'title': title, 'authors': authors, 'abstract': abstract, 'doi': doi, 'citations': citations }
+```
+
 - Functional Description
   - Handle each task of searching professors and going through different sources across different machines independently
 - Input 
@@ -42,6 +60,12 @@ This module includes the crawlers for the Arxiv, Google Scholar, Springer, and O
   - https://iopscience.iop.org/article/10.1088/1755-1315/108/4/042086/pdf
 
 ### Utilize Edit Distance / Entity Deduplication to handle Duplicates
+```
+def remove_duplicates(publications):
+  ...
+  return { 'title': title, 'authors': authors, 'abstract': abstract, 'doi': doi, 'citations': citations }
+```
+
 - Functional Description
   - Removes duplicate entries in the publication data based on publication titles- Input 
 - Input 
