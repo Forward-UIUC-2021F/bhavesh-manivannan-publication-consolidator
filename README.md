@@ -21,7 +21,7 @@ def consolidate(professor, university):
   - Professor name, university
 - Output
   - Unified database of scraped information from various knowledge bases:
-      - Arxiv: https://www.kaggle.com/Cornell-University/arxiv
+      - Arxiv: https://arxiv.org/help/api
       - OAG (MAG + Aminer): https://www.microsoft.com/en-us/research/project/open-academic-graph/
       - Springer: https://dev.springernature.com/ 
                   - https://dev.springernature.com/example-metadata-response 
