@@ -77,7 +77,7 @@ def remove_duplicates(publications):
   - Entity deduplication: https://www.researchgate.net/publication/317177489_Entity_Deduplication_on_ScholarlyData 
 
 ## Algorithmic Design
-Given an input professor and their corresponding university, we first crawl the various knowledge bases for publication data associated with the given professor. (Note: The Arxiv and Open Academic Graph knowledge bases have data stored on an intermediary SQL database to easily access the data remotely.)
+Given an input professor and their corresponding university, we first crawl the various knowledge bases for publication data associated with the given professor. (Note: The Open Academic Graph knowledge base has data stored on an intermediary SQL database to easily access the data remotely.)
 
 The Distributed Crawler module performs all of these crawling tasks simultaneously. Once the publication data is consolidated, it is passed into the “Remove Duplicates Module” where Edit Distance + Entity Deduplication is performed to remove duplicate publication data. Then, the final cleaned up publication data is sent to the website database. 
 
