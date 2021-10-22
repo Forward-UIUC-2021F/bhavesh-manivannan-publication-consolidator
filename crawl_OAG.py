@@ -1,9 +1,12 @@
 """ 
 This program extracts professor and publication data from Microsoft Open Academic Graph (OAG) Knowledge Base.
 """ 
-
 import json
 import pandas as pd
+import pymysql
+import logging
+import sshtunnel
+from sshtunnel import SSHTunnelForwarder
 
 def contains_professor(authors_list, professor):
     """Checks if the given professor is one of the authors of the publication.
@@ -54,15 +57,18 @@ def crawl(professor, university):
         publications (pandas dataframe): Data containing the publications' titles, authors, abstracts, and DOI's
 
     """
-    # Initialization
-    column_names = ["title", "authors", "abstract", "doi", "citations"]
-    publications = pd.DataFrame(columns = column_names)
+    first_name = professor.split(" ")[0]
+    last_name = professor.split(" ")[1]
+    open_ssh_tunnel()
+    mysql_connect()
 
-    # Call crawling helper functions
-    aminer = crawl_helper(professor, university, "data/aminer_papers_12.txt")
-    mag = crawl_helper(professor, university, "data/mag_papers_10.txt",)
-    publications = publications.append(aminer)
-    publications = publications.append(mag)
+    query = "SELECT * FROM bm12_publications.publication_data WHERE (UPPER(authors) like UPPER('%" + first_name + "%') AND UPPER(authors) like UPPER('%" +  last_name + "%'));"
+    publications = run_query(query)
+    publications = publications.iloc[: , 1:]
+
+    mysql_disconnect()
+    close_ssh_tunnel()
+
     return publications
 
 def crawl_helper(professor, university, file):
@@ -127,20 +133,98 @@ def crawl_helper(professor, university, file):
                 temp_dict["citations"] = ""
             
             publications = publications.append(temp_dict, ignore_index=True)
-            # print(temp_dict)
     
     return publications
 
+def open_ssh_tunnel(verbose=False):
+    """Open an SSH tunnel and connect using a username and password.
+    
+    Args:
+      verbose(bool): Set to True to show logging
+
+    Returns: 
+      tunnel: Global SSH tunnel connection
+    """
+    # SSH Information
+    ssh_host = 'Owl2.cs.illinois.edu'
+    ssh_user = 'bm12'
+
+    # Load SSH password from file
+    text_file = open("ssh_password.txt", "r")
+    ssh_pass = text_file.read()
+    text_file.close()
+
+    if verbose:
+        sshtunnel.DEFAULT_LOGLEVEL = logging.DEBUG
+    
+    global tunnel
+    tunnel = SSHTunnelForwarder(
+        (ssh_host, 22),
+        ssh_username = ssh_user,
+        ssh_password = ssh_pass,
+        remote_bind_address = ('127.0.0.1', 3306)
+    )
+    
+    tunnel.start()
+
+def mysql_connect():
+    """Connect to a MySQL server using the SSH tunnel connection
+    
+    Returns: 
+      connection: Global MySQL database connection
+    """
+    # Database Credentials
+    db_host = '127.0.0.1'
+    db_name = "bm12_publications"
+    db_user = "bm12"
+
+    # Load database password from file
+    text_file = open("db_password.txt", "r")
+    db_password = text_file.read()
+    text_file.close()
+
+    global connection
+    
+    connection = pymysql.connect(
+        host=db_host,
+        user=db_user,
+        passwd=db_password,
+        db=db_name,
+        port=tunnel.local_bind_port
+    )
+
+def run_query(sql):
+    """Runs a given SQL query via the global database connection.
+    
+    Args:
+      sql: MySQL query
+    
+    Returns: 
+      Pandas dataframe containing results
+    """
+    
+    return pd.read_sql_query(sql, connection)
+
+def mysql_disconnect():
+    """Closes the MySQL database connection.
+    """
+    connection.close()
+
+def close_ssh_tunnel():
+    """Closes the SSH tunnel connection.
+    """
+    tunnel.close
+
 def test_OAG():
     """Testing suite for OAG crawler"""
-    publications = crawl_helper("Juan Jacobo", "University of Colorado Boulder", "data/oag_test.txt")
+    publications = crawl("Juan Jacobo", "University of Colorado Boulder")
     assert "El concepto de empresa internacional en la regulación de los contratos de arrendamiento de inmuebles" in publications.values
     assert "Juan Jacobo" in publications.values
 
-    publicationsTwo = crawl_helper("Mark C. Hakey", "University of New Hampshire Durham", "data/oag_test.txt")
+    publicationsTwo = crawl("Mark C. Hakey", "University of New Hampshire Durham")
     assert "Frequency doubling hybrid photoresist having negative and positive tone components and method of preparing the same" in publicationsTwo.values
     assert "Mark C. Hakey, Steven J. Holmes, David V. Horak, Ahmad D. Katnani, Niranjan M. Patel, Paul A. Rabidoux" in publicationsTwo.values
 
     print("All OAG Crawler tests passed.")
 
-# test_OAG()
+test_OAG()
