@@ -1,18 +1,15 @@
 """
 This module crawls publication and professor data from the arXiv knowledge base.
 
-Knowledge Base Reference: https://www.kaggle.com/Cornell-University/arxiv
+Knowledge Base Reference: https://arxiv.org/help/api
+
+Thank you to arXiv for use of its open access interoperability.
 """
 
 import pandas as pd
 import json
-
-def get_metadata():
-    """This function returns the data from the json file."""
-    with open('data/arxiv-test.json') as f:
-        for line in f:
-            yield line
-
+import arxiv
+    
 def crawl(professor, university):
     """Crawls Arxiv knowledge base for publications associated with the professor from the specified university.
 
@@ -26,25 +23,29 @@ def crawl(professor, university):
     """
 
     # Initialization
-    metadata = get_metadata()
     column_names = ["title", "authors", "abstract", "doi", "citations"]
     publications = pd.DataFrame(columns = column_names)
+    first_name = professor.split(" ")[0]
+    last_name = professor.split(" ")[1]
+    
+    # API Call to Arxiv API
+    search = arxiv.Search(
+        query = "au:" + professor,
+        max_results = 200,
+        sort_by = arxiv.SortCriterion.Relevance
+    )
 
-    # Loop through Arxiv data
-    for ind, paper in enumerate(metadata):
-        paper = json.loads(paper)
-        temp_dict = {}
-        # print(paper)
-        # print(paper['submitter'])
-
-        # Check if professor names match
-        if professor.lower() == paper['submitter'].lower():
-            temp_dict['title'] = paper['title']
-            temp_dict['authors'] = paper['authors']
-            temp_dict['abstract'] = paper['abstract']
-            temp_dict['doi'] = paper['doi']
-            publications = publications.append(temp_dict, ignore_index=True)
-            # print(publications)
+    # Loop through results and find publications matching professor.
+    for result in search.results():
+        for x in result.authors:
+            if first_name in str(x) and last_name in str(x):
+                temp_dict = {}
+                temp_dict['title'] = result.title
+                temp_dict['authors'] = authors_to_string(result.authors)
+                temp_dict['abstract'] = result.summary
+                temp_dict['doi'] = result.doi
+                publications = publications.append(temp_dict, ignore_index=True)
+                break
             
     return publications
 
@@ -74,11 +75,30 @@ def ab_name_format(professor):
       
     return temp.strip()
 
+def authors_to_string(authors_list):
+    """Converts list of Arxiv authors into a comma separated string.
+
+    Args:
+        authors_list (list): List of authors from Arxiv.
+
+    Returns:
+        temp (str): Comma separated string of all the creators
+
+    """
+    temp = ""
+    for x in range(len(authors_list)):
+        temp += str(authors_list[x])
+
+        if (x != len(authors_list) - 1):
+            temp += ", "
+
+    return temp
+
 def test_arxiv():
     """Testing suite for Arxiv crawler"""
     publications = crawl("Pavel Nadolsky", "University of Colorado Boulder")
-    assert "Calculation of prompt diphoton production cross sections at Tevatron and\n  LHC energies" in publications.values
-    assert "10.1103/PhysRevD.76.013009" in publications.values
+    assert 'Multiple parton radiation in hadroproduction at lepton-hadron colliders' in publications.values
+    assert "10.1063/1.1896698" in publications.values
 
     publicationsTwo = crawl("Louis Theran", "University of Massachusetts")
     assert "Sparsity-certifying Graph Decompositions" in publicationsTwo.values
