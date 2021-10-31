@@ -11,7 +11,7 @@ import logging
 import sshtunnel
 from sshtunnel import SSHTunnelForwarder
 
-def oag_to_sql_server(file_path):
+def oag_to_sql_server(pub_file_path, author_file_path):
   """ Updates the SQL server with latest OAG knowledge base data.
 
     Args:
@@ -22,9 +22,11 @@ def oag_to_sql_server(file_path):
        -1 (int): SQL query was not successful
 
   """
-  # Use crawl_helper from crawl_OAG.py to pull data
-  publications = crawl_OAG.crawl_helper("", "", file_path)
+  # Use helper functions from crawl_OAG.py to pull data
+  publications = crawl_OAG.publication_crawler(pub_file_path)
+  authors = crawl_OAG.author_crawler(author_file_path)
 
+  # Insert into publications table
   for index, row in publications.iterrows():
     citations = row["citations"]
     if citations == "":
@@ -35,10 +37,27 @@ def oag_to_sql_server(file_path):
     
     connection.ping()  # reconnecting mysql
     with connection.cursor() as cursor:         
-        # Create a new record
-        sql = "INSERT IGNORE INTO publication_data (title, authors, abstract, doi, citations) VALUES (%s, %s, %s, %s, %s)"
-        val = (row["title"], row["authors"], row["abstract"], row["doi"], citations)
+        sql = "INSERT IGNORE INTO publication_data (id, title, authors, abstract, doi, citations) VALUES (%s, %s, %s, %s, %s, %s)"
+        val = (row["id"], row["title"], row["authors"], row["abstract"], row["doi"], citations)
         cursor.execute(sql, val)
+
+    # Connection is not autocommit by default. So you must commit to save your changes.
+    connection.commit()
+
+  # Insert into authors and publication_authors table.
+  for index, row in authors.iterrows():
+    connection.ping()  # reconnecting mysql
+    with connection.cursor() as cursor:         
+        # Insert into authors table
+        sql = "INSERT IGNORE INTO author_data (id, name, org) VALUES (%s, %s, %s)"
+        val = (row["id"], row["name"], row["org"])
+        cursor.execute(sql, val)
+
+        # Insert into publication_authors table
+        for x in range(len(row["pubs"])):
+          sql = "INSERT IGNORE INTO publication_author (publication_id, author_id) VALUES (%s, %s)"
+          val = (row["pubs"][x]["i"], row["id"])
+          cursor.execute(sql, val)
 
     # Connection is not autocommit by default. So you must commit to save your changes.
     connection.commit()
@@ -127,10 +146,10 @@ def test_intermediary_database():
   open_ssh_tunnel()
   mysql_connect()
 
-  oag_to_sql_server("data\oag_test.txt")
+  oag_to_sql_server("data\oag_test.txt", "data\oag_authors.txt")
   df = run_query("SELECT * FROM publication_data;")
-  assert 'Regulation of K+(86Rb+) absorption by roots of hybrid rice (Weiyou 49) low-salt seedlings.' in df.values
-  assert 'S. P. Xie, J. S. Ni' in df.values
+  assert 'Data mining: concepts and techniques' in df.values
+  assert 'Jiawei Han' in df.values
 
   mysql_disconnect()
   close_ssh_tunnel()
