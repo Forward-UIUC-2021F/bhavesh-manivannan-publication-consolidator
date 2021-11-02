@@ -55,6 +55,7 @@ def crawl(professor, university):
     """
     first_name = professor.split(" ")[0]
     last_name = professor.split(" ")[1]
+    
     sql_helper.open_ssh_tunnel()
     sql_helper.mysql_connect()
 

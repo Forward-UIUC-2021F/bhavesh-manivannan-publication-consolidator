@@ -71,6 +71,7 @@ def test_intermediary_database():
 
   sql_helper.mysql_disconnect()
   sql_helper.close_ssh_tunnel()
+
   
   print("All intermediary database tests passed.")
 
