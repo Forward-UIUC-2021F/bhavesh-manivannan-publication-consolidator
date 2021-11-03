@@ -3,10 +3,7 @@ This program extracts professor and publication data from Microsoft Open Academi
 """ 
 import json
 import pandas as pd
-import pymysql
-import logging
-import sshtunnel
-from sshtunnel import SSHTunnelForwarder
+import sql_helper
 
 def contains_professor(authors_list, professor):
     """Checks if the given professor is one of the authors of the publication.
@@ -58,8 +55,9 @@ def crawl(professor, university):
     """
     first_name = professor.split(" ")[0]
     last_name = professor.split(" ")[1]
-    open_ssh_tunnel()
-    mysql_connect()
+    
+    sql_helper.open_ssh_tunnel()
+    sql_helper.mysql_connect()
 
     query = """
         SELECT title, abstract, doi, citations, authors
@@ -68,9 +66,9 @@ def crawl(professor, university):
         INNER JOIN bm12_publications.publication_data as pd ON pa.publication_id = pd.id
         WHERE (UPPER(name) like UPPER('%""" + first_name + "%') AND UPPER(name) like UPPER('%" +  last_name + "%') AND UPPER(org) like UPPER('%" +  university + "%')); """
 
-    publications = run_query(query)
-    mysql_disconnect()
-    close_ssh_tunnel()
+    publications = sql_helper.run_query(query)
+    sql_helper.mysql_disconnect()
+    sql_helper.close_ssh_tunnel()
 
     return publications
 
@@ -203,85 +201,6 @@ def author_crawler(file):
         authors = authors.append(temp_dict, ignore_index=True)
     
     return authors
-
-def open_ssh_tunnel(verbose=False):
-    """Open an SSH tunnel and connect using a username and password.
-    
-    Args:
-      verbose(bool): Set to True to show logging
-
-    Returns: 
-      tunnel: Global SSH tunnel connection
-    """
-    # SSH Information
-    ssh_host = 'Owl2.cs.illinois.edu'
-    ssh_user = 'bm12'
-
-    # Load SSH password from file
-    text_file = open("ssh_password.txt", "r")
-    ssh_pass = text_file.read()
-    text_file.close()
-
-    if verbose:
-        sshtunnel.DEFAULT_LOGLEVEL = logging.DEBUG
-    
-    global tunnel
-    tunnel = SSHTunnelForwarder(
-        (ssh_host, 22),
-        ssh_username = ssh_user,
-        ssh_password = ssh_pass,
-        remote_bind_address = ('127.0.0.1', 3306)
-    )
-    
-    tunnel.start()
-
-def mysql_connect():
-    """Connect to a MySQL server using the SSH tunnel connection
-    
-    Returns: 
-      connection: Global MySQL database connection
-    """
-    # Database Credentials
-    db_host = '127.0.0.1'
-    db_name = "bm12_publications"
-    db_user = "bm12"
-
-    # Load database password from file
-    text_file = open("db_password.txt", "r")
-    db_password = text_file.read()
-    text_file.close()
-
-    global connection
-    
-    connection = pymysql.connect(
-        host=db_host,
-        user=db_user,
-        passwd=db_password,
-        db=db_name,
-        port=tunnel.local_bind_port
-    )
-
-def run_query(sql):
-    """Runs a given SQL query via the global database connection.
-    
-    Args:
-      sql: MySQL query
-    
-    Returns: 
-      Pandas dataframe containing results
-    """
-    
-    return pd.read_sql_query(sql, connection)
-
-def mysql_disconnect():
-    """Closes the MySQL database connection.
-    """
-    connection.close()
-
-def close_ssh_tunnel():
-    """Closes the SSH tunnel connection.
-    """
-    tunnel.close
 
 def test_OAG():
     """Testing suite for OAG crawler"""
