@@ -12,7 +12,8 @@ def oag_to_sql_server(pub_file_path, author_file_path):
   """ Updates the SQL server with latest OAG knowledge base data.
 
     Args:
-        file_path (str): Path to the OAG knowledge base file.
+        pub_file_path (str): Path to the OAG publication knowledge base file.
+        author_file_path (str): Path to the OAG author knowledge base file.
 
     Returns:
         1 (int): SQL query was successful
@@ -75,4 +76,5 @@ def test_intermediary_database():
   
   print("All intermediary database tests passed.")
 
-test_intermediary_database()
+# test_intermediary_database()
+oag_to_sql_server("data/aminer_papers_1.txt", "")

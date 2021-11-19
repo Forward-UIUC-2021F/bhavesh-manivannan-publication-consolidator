@@ -36,7 +36,9 @@ def authors_to_string(authors_list):
     """
     temp = ""
     for x in range(len(authors_list)):
-        temp += authors_list[x]["name"]
+        # print(authors_list[x])
+        if "name" in authors_list[x]:
+            temp += authors_list[x]["name"]
 
         if (x != len(authors_list) - 1):
             temp += ", "
@@ -211,4 +213,4 @@ def test_OAG():
 
     print("All OAG Crawler tests passed.")
 
-test_OAG()
+# test_OAG()
