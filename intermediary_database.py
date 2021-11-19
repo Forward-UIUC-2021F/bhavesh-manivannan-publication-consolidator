@@ -20,6 +20,9 @@ def oag_to_sql_server(pub_file_path, author_file_path):
        -1 (int): SQL query was not successful
 
   """
+  sql_helper.open_ssh_tunnel()
+  sql_helper.mysql_connect()
+
   # Use helper functions from crawl_OAG.py to pull data
   publications = crawl_OAG.publication_crawler(pub_file_path)
   authors = crawl_OAG.author_crawler(author_file_path)
@@ -60,6 +63,9 @@ def oag_to_sql_server(pub_file_path, author_file_path):
     # Connection is not autocommit by default. So you must commit to save your changes.
     sql_helper.connection.commit()
 
+    sql_helper.mysql_disconnect()
+    sql_helper.close_ssh_tunnel()
+
 def test_intermediary_database():
   """Testing suite for intermediary database."""
   sql_helper.open_ssh_tunnel()
@@ -77,4 +83,5 @@ def test_intermediary_database():
   print("All intermediary database tests passed.")
 
 # test_intermediary_database()
-oag_to_sql_server("data/aminer_papers_1.txt", "")
+#oag_to_sql_server("data/aminer_papers_1.txt", "")
+oag_to_sql_server("data/oag_test.txt", "")
