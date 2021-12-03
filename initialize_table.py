@@ -84,52 +84,37 @@ def close_ssh_tunnel():
     """
     tunnel.close()
 
-""""
-mydb = mysql.connector.connect(
-	host="owl2.cs.illinois.edu",
-	user="juefeic2",
-	password="0202141208",
-	database="juefeic2_educationtoday"
-)
-
-mycursor = mydb.cursor()
-
-# column priority can be used to prioritize tasks,
-# then the master server can assign tasks follow this priority
-mycursor.execute("DROP TABLE IF EXISTS Tasks")
-mycursor.execute("CREATE TABLE Tasks (task VARCHAR(20), priority int)")
-
-sql = 'insert into Tasks (task, priority) values (%s, %s)'
-for i in range(1000):
-	mycursor.execute(sql, ('{} plus {}'.format(i, i), i))
-
-mycursor.execute('drop table if exists Output')
-mycursor.execute("CREATE TABLE Output (task varchar(20), result varchar(20), timestamp varchar(100), status varchar(100))")
-
-
-"""
-
 open_ssh_tunnel()
 mysql_connect()
 
 connection.ping()
 with connection.cursor() as cursor:
 	cursor.execute("DROP TABLE IF EXISTS Tasks")
-	cursor.execute("CREATE TABLE Tasks (task VARCHAR(20), priority int)")
+	cursor.execute("CREATE TABLE Tasks (task VARCHAR(1000), priority int)")
 	connection.commit()
 	
-for i in range(1000):
-	connection.ping()
-	with connection.cursor() as cursor:
-		sql = 'insert into Tasks (task, priority) values (%s, %s)'
-		cursor.execute(sql, ('{} plus {}'.format(i, i), i))
-connection.commit()
 connection.ping()
-
 with connection.cursor() as cursor:
-	cursor.execute('drop table if exists Output')
-	cursor.execute("CREATE TABLE Output (task varchar(20), result varchar(20), timestamp varchar(100), status varchar(100))")
-connection.commit()
+	# Springer
+  sql = 'insert into Tasks (task, priority) values (%s, %s)'
+  val = ("crawl_springer;Jiawei Han;University of Illinois Urbana-Champaign", 1)
+  cursor.execute(sql, val)
 
-mysql_disconnect()
-close_ssh_tunnel()
+  # Arxiv
+  sql = 'insert into Tasks (task, priority) values (%s, %s)'
+  val = ("crawl_arxiv;Jiawei Han;University of Illinois Urbana-Champaign", 2)
+  cursor.execute(sql, val)
+
+  # OAG
+  sql = 'insert into Tasks (task, priority) values (%s, %s)'
+  val = ("crawl_OAG;Jiawei Han;University of Illinois Urbana-Champaign", 3)
+  cursor.execute(sql, val)
+
+  # Google Scholar
+  """
+  sql = 'insert into Tasks (task, priority) values (%s, %s)'
+  val = ("crawl_gscholar;Jiawei Han;University of Illinois Urbana-Champaign", 4)
+  cursor.execute(sql, val)
+  """
+
+connection.commit()
