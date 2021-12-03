@@ -1,0 +1,9 @@
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/home/bm12/publication-consolidator/intermediary_database.py", line 80, in <module>
+    sql_helper.close_ssh_tunnel()
+  File "/home/bm12/publication-consolidator/intermediary_database.py", line 24, in oag_to_sql_server
+    sql_helper.mysql_connect()
+  File "/home/bm12/publication-consolidator/crawl_OAG.py", line 100, in publication_crawler
+    line = file_papers.readline()
+OSError: [Errno 116] Stale file handle

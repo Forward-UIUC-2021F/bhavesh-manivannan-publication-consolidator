@@ -1,4 +1,4 @@
-import pymysql
+# import pymysql
 import pandas as pd
 import logging
 import sshtunnel
@@ -47,20 +47,14 @@ def mysql_connect():
     db_host = '127.0.0.1'
     db_name = "bm12_publications"
     db_user = "bm12"
-
-    # Load database password from file
-    text_file = open("db_password.txt", "r")
-    db_password = text_file.read()
-    text_file.close()
-
+    db_password = "publications123"
     global connection
     
     connection = mysql.connector.connect(
-        host=db_host,
+        host="localhost",
         user=db_user,
-        passwd=db_password,
-        db=db_name,
-        port=tunnel.local_bind_port
+        password=db_password,
+        db=db_name
     )
 
 def run_query(sql):
