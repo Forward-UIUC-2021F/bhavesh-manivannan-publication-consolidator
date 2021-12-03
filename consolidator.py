@@ -40,15 +40,10 @@ def consolidate(professor, university):
     print("Springer crawling complete")
     print(springer_publications)
 
-    # Crawl MAG
-    mag_publications = oag.crawl_mag(professor, university)
-    print("MAG crawling complete")
-    print(mag_publications)
-
-    # Crawl Aminer
-    aminer_publications = oag.crawl_aminer(professor, university)
-    print("Aminer crawling complete")
-    print(aminer_publications)
+    # Crawl MAG + Aminer
+    mag_aminer_publications = oag.crawl(professor, university)
+    print("MAG + Aminer crawling complete")
+    print(mag_aminer_publications)
 
     # Crawl Google Scholar
     # gscholar_publications = gscholar.crawl(professor, university)
@@ -57,8 +52,7 @@ def consolidate(professor, university):
     
     publications = publications.append(arxiv_publications)
     publications = publications.append(springer_publications)
-    publications = publications.append(mag_publications)
-    publications = publications.append(aminer_publications)
+    publications = publications.append(mag_aminer_publications)
     # publications = publications.append(gscholar_publications)
     
     return publications
