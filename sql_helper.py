@@ -1,4 +1,3 @@
-import pymysql
 import pandas as pd
 import logging
 import sshtunnel
