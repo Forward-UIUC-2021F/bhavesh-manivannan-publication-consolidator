@@ -59,7 +59,7 @@ def mysql_connect():
         user=db_user,
         passwd=db_password,
         db=db_name,
-        port=tunnel.local_bind_port
+        port=3306
     )
 
 def run_query(sql):

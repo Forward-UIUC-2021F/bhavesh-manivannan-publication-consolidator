@@ -20,7 +20,7 @@ def oag_to_sql_server(pub_file_path, author_file_path):
        -1 (int): SQL query was not successful
 
   """
-  sql_helper.open_ssh_tunnel()
+  # sql_helper.open_ssh_tunnel()
   sql_helper.mysql_connect()
 
   # Use helper functions from crawl_OAG.py to pull data
@@ -62,19 +62,19 @@ def oag_to_sql_server(pub_file_path, author_file_path):
     sql_helper.connection.commit()
 
   sql_helper.mysql_disconnect()
-  sql_helper.close_ssh_tunnel()
+  # sql_helper.close_ssh_tunnel()
 
 def test_intermediary_database():
   """Testing suite for intermediary database."""
   oag_to_sql_server("data\oag_test.txt", "data\oag_authors.txt")
-  sql_helper.open_ssh_tunnel()
+  # sql_helper.open_ssh_tunnel()
   sql_helper.mysql_connect()
   df = sql_helper.run_query("SELECT * FROM publication_data;")
   assert 'Data mining: concepts and techniques' in df.values
   assert 'Jiawei Han' in df.values
   print("All intermediary database tests passed.")
   sql_helper.mysql_disconnect()
-  sql_helper.close_ssh_tunnel()
+  # sql_helper.close_ssh_tunnel()
 
 test_intermediary_database()
 # oag_to_sql_server("data/aminer_papers_1.txt", "")
