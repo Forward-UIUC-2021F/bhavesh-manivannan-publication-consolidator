@@ -1,41 +1,5 @@
-# import pymysql
 import pandas as pd
-import logging
-import sshtunnel
-from sshtunnel import SSHTunnelForwarder
 import mysql.connector
-
-def open_ssh_tunnel(verbose=False):
-    """Open an SSH tunnel and connect using a username and password.
-    
-    Args:
-      verbose(bool): Set to True to show logging
-
-    Returns: 
-      tunnel: Global SSH tunnel connection
-    """
-    # SSH Information
-    ssh_host = 'Owl2.cs.illinois.edu'
-    ssh_user = 'bm12'
-
-    # Load SSH password from file
-    text_file = open("ssh_password.txt", "r")
-    ssh_pass = text_file.read()
-    text_file.close()
-
-    if verbose:
-        sshtunnel.DEFAULT_LOGLEVEL = logging.DEBUG
-    
-    global tunnel
-    tunnel = SSHTunnelForwarder(
-        (ssh_host, 22),
-        ssh_username = ssh_user,
-        ssh_password = ssh_pass,
-        remote_bind_address = ('127.0.0.1', 3306)
-    )
-    
-    tunnel.start()
-
 
 def mysql_connect():
     """Connect to a MySQL server using the SSH tunnel connection
@@ -73,8 +37,3 @@ def mysql_disconnect():
     """Closes the MySQL database connection.
     """
     connection.close()
-
-def close_ssh_tunnel():
-    """Closes the SSH tunnel connection.
-    """
-    tunnel.close()
