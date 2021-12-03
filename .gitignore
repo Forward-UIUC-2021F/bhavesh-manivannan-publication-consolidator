@@ -3,3 +3,7 @@
 data/oag_test.csv
 database_testing.py
 data/
+oag_test.txt
+oag_authors.txt
+*.txt
+*.zip
