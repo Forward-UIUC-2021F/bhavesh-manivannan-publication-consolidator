@@ -3,6 +3,7 @@ import pandas as pd
 import logging
 import sshtunnel
 from sshtunnel import SSHTunnelForwarder
+import mysql.connector
 
 def open_ssh_tunnel(verbose=False):
     """Open an SSH tunnel and connect using a username and password.
@@ -54,12 +55,12 @@ def mysql_connect():
 
     global connection
     
-    connection = pymysql.connect(
+    connection = mysql.connector.connect(
         host=db_host,
         user=db_user,
         passwd=db_password,
         db=db_name,
-        port=3306
+        port=tunnel.local_bind_port
     )
 
 def run_query(sql):
