@@ -20,7 +20,7 @@ def oag_to_sql_server(pub_file_path, author_file_path):
        -1 (int): SQL query was not successful
 
   """
-  # sql_helper.open_ssh_tunnel()
+  sql_helper.open_ssh_tunnel()
   sql_helper.mysql_connect()
 
   # Use helper functions from crawl_OAG.py to pull data
@@ -48,13 +48,13 @@ def oag_to_sql_server(pub_file_path, author_file_path):
     # Insert into authors and publication_authors table.
     for index, row in authors.iterrows():
       # Insert into authors table
-      sql = "INSERT IGNORE INTO author_data (id, name, org) VALUES (%s, %s, %s)"
-      val = (row["id"], row["name"], row["org"])
+      sql = ("INSERT IGNORE INTO author_data (id, name, org) VALUES (%s, %s, %s)")
+      val = (row["id"], row["name"], row["org"][0])
       cursor.execute(sql, val)
 
       # Insert into publication_authors table
       for x in range(len(row["pubs"])):
-        sql = "INSERT IGNORE INTO publication_author (publication_id, author_id) VALUES (%s, %s)"
+        sql = ("INSERT IGNORE INTO publication_author (publication_id, author_id) VALUES (%s, %s)")
         val = (row["pubs"][x]["i"], row["id"])
         cursor.execute(sql, val)
 
@@ -62,19 +62,19 @@ def oag_to_sql_server(pub_file_path, author_file_path):
     sql_helper.connection.commit()
 
   sql_helper.mysql_disconnect()
-  # sql_helper.close_ssh_tunnel()
+  sql_helper.close_ssh_tunnel()
 
 def test_intermediary_database():
   """Testing suite for intermediary database."""
   oag_to_sql_server("data\oag_test.txt", "data\oag_authors.txt")
-  # sql_helper.open_ssh_tunnel()
+  sql_helper.open_ssh_tunnel()
   sql_helper.mysql_connect()
   df = sql_helper.run_query("SELECT * FROM publication_data;")
   assert 'Data mining: concepts and techniques' in df.values
   assert 'Jiawei Han' in df.values
   print("All intermediary database tests passed.")
   sql_helper.mysql_disconnect()
-  # sql_helper.close_ssh_tunnel()
+  sql_helper.close_ssh_tunnel()
 
 test_intermediary_database()
 # oag_to_sql_server("data/aminer_papers_1.txt", "")
