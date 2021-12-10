@@ -207,8 +207,6 @@ def test_intermediary_database():
     assert 'Data mining: concepts and techniques' in df.values
     assert 'Jiawei Han' in df.values
     print("All intermediary database tests passed.")
-  
-    
 
 # test_intermediary_database()
 # test_OAG()
