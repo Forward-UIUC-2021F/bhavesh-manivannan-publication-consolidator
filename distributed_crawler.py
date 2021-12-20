@@ -67,4 +67,4 @@ def test_crawler():
     assert 'Compilation-Based List Processing in Deductive Databases' in df.values
     print("All crawler tests passed.")
 
-# test_crawler()
+test_crawler()
