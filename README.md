@@ -10,76 +10,80 @@ This module includes the crawlers for the Arxiv, Google Scholar, Springer, and O
 
 
 ## Functional Design 
-### Knowledge Base Consolidator:
+### Knowledge Base Crawlers:
 ```
-def consolidate(professor, university):
+def crawl_oag()/crawl_gscholar()/crawl_arxiv()/crawl_springer():
   ...
-  return { 'title': title, 'authors': authors, 'abstract': abstract, 'doi': doi, 'citations': citations }
+   return { 'title': title, 'authors': authors, 'abstract': abstract, 'doi': doi, 'citations': citations }
 ```
-
-- Input 
-  - Professor name, university
+- Input: 
+  - Professor name, University name
 - Output
-  - Unified database of scraped information from various knowledge bases:
+  - Pandas dataframe containing knowledgebase data:
       - Arxiv: https://arxiv.org/help/api
       - OAG (MAG + Aminer): https://www.microsoft.com/en-us/research/project/open-academic-graph/
       - Springer: https://dev.springernature.com/ 
                   - https://dev.springernature.com/example-metadata-response 
                   - https://dev.springernature.com/restfuloperations 
-   - Google Scholar: https://scholar.google.com/
+      - Google Scholar: https://scholar.google.com/
 
-### Module Storing Latest Version of Static Knowledge Bases on Intermediary SQL Database: 
+### Module Storing Latest Version of Microsoft Open Academic Graph on Intermediary SQL Database: 
 ```
-def store_knowledge_base_intemediary_sql(knowledge_base):
+def publication_crawler(file):
+  # Crawler helper function that crawls data for publications
   ...
-  # Updates the SQL server with latest knowledge base data.
-```
 
+def author_crawler(file):
+  # Crawler helper function that crawls data for authors from a file
+  ...
+```
 - Input 
-  - Aminer, MAG, Arxiv databases (separate functions for each)
+  - File path to the Open Academic Graphic text files.
 - Output
-  - Updated SQL server containing the latest knowledge base data.
+  - Updated author_data, publication_data, publication_author SQL tables containing the latest knowledge base data.
 - References:
   - https://www.ijstr.org/final-print/oct2015/Query-Optimization-Techniques-Tips-For-Writing-Efficient-And-Faster-Sql-Queries.pdf 
 
 ### Distributed Crawler Job Management Module:
 ```
-def distributed_crawler(crawling_tasks):
+def crawl(professor, university):
+  # Performs scraping tasks from existing knowledge bases. 
+  # The queried data is stored in a temporary output_publications SQL table. 
+  # It is then consolidated.
   ...
-  return { 'title': title, 'authors': authors, 'abstract': abstract, 'doi': doi, 'citations': citations }
+```
+- Functional Description
+  - Handle each task of searching professors asynchronously through the use of workers.
+- Input 
+  - Professor name, University name
+- Output
+  - Scraping information off multiple websites and sources simultaneously using asynchronous workers from Python Celery library. Crawled data sent to output_publications database table. 
+- References:
+  - https://medium.com/analytics-vidhya/python-celery-distributed-task-queue-demystified-for-beginners-to-professionals-part-1-b27030912fea
+  -https://medium.com/analytics-vidhya/python-celery-explained-for-beginners-to-professionals-part-3-workers-pool-and-concurrency-ef0522e89ac5 
+
+
+### Consolidation Module
+```
+def consolidate():
+    # Handles overlaps and conflicting information from the different knowledge bases. 
+    # The final data is uploaded into final_publications table on the database.
+    ...
 ```
 
 - Functional Description
-  - Handle each task of searching professors and going through different sources across different machines independently
+  - Removes duplicate entries in the publication data based on publication titles. 
+  - Maximizes the amount of information extracted for a single publication across
+  all the knowledge bases.
 - Input 
-  - List of Crawling Tasks
+  - output_publications database table
 - Output
-  - Scraping information off multiple websites and sources simultaneously. Crawled Data sent to database. 
-- References:
-  - https://github.com/FS3113/Distributed-System/blob/main/daemon.go 
-  - https://iopscience.iop.org/article/10.1088/1755-1315/108/4/042086/pdf
-
-### Utilize Edit Distance / Entity Deduplication to handle Duplicates
-```
-def remove_duplicates(publications):
-  ...
-  return { 'title': title, 'authors': authors, 'abstract': abstract, 'doi': doi, 'citations': citations }
-```
-
-- Functional Description
-  - Removes duplicate entries in the publication data based on publication titles- Input 
-- Input 
-  - Pandas dataframe containing Publications data
-- Output
-  - Pandas dataframe containing Publications data with duplicates removed
-- References:
-  - Edit distance: https://link.springer.com/chapter/10.1007/978-981-13-0755-3_6 
-  - Entity deduplication: https://www.researchgate.net/publication/317177489_Entity_Deduplication_on_ScholarlyData 
+  - final_publications database table
 
 ## Algorithmic Design
-Given an input professor and their corresponding university, we first crawl the various knowledge bases for publication data associated with the given professor. (Note: The Open Academic Graph knowledge base has data stored on an intermediary SQL database to easily access the data remotely.)
+Given an input professor and their corresponding university, we first crawl the various knowledge bases for publication data associated with the given professor. The Distributed Crawler module performs all of these crawling tasks simultaneously and stores the output into the output_publications database table. 
 
-The Distributed Crawler module performs all of these crawling tasks simultaneously. Once the publication data is consolidated, it is passed into the “Remove Duplicates Module” where Edit Distance + Entity Deduplication is performed to remove duplicate publication data. Then, the final cleaned up publication data is sent to the website database. 
+Once the publication data is crawled, it is passed into the Consolidation Module where  duplicate publication data is handled. If duplicates exist, the publication information is compiled into a single entry containing the maximum amount of information across the knowledge bases. Then, the final cleaned up publication data is sent to the final_publications database where it is ready to be used by the Forward Education Website.
 
 ![image](https://user-images.githubusercontent.com/12843675/137550123-7d1effde-7f13-4d8b-a669-72b8b7a2be9c.png)
 

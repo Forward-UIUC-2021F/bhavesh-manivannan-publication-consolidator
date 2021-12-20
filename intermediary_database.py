@@ -39,11 +39,12 @@ def authors_to_string(authors_list):
     return temp
 
 def publication_crawler(file):
-    """Crawler helper function that crawls data for publications
+    """Crawler helper function that crawls data for publications.
+    Updates publication_data SQL Table
+
     Args:
         file (str): Path of file
-    Returns:
-        publications (pandas dataframe): Data containing the publications' titles, authors, abstracts, and DOI's
+    
     """
     # Initialization
     column_names = ["id", "title", "authors", "abstract", "doi", "citations"]
@@ -116,11 +117,11 @@ def publication_crawler(file):
     
 
 def author_crawler(file):
-    """Crawler helper function that crawls data for authors from a file
+    """Crawler helper function that crawls data for authors from a file. 
+    Updates author_data and publication_author SQL tables.
+
     Args:
         file (str): Path of file
-    Returns:
-        authors (pandas dataframe): Data containing the authors' id, name, and organization
     """
     # Initialization
     column_names = ["id", "name", "org", "pubs"]

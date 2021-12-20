@@ -16,7 +16,8 @@ import json
 import sql_helper
 
 def consolidate():
-    """ Handles overlaps and conflicting information from the different knowledge bases.
+    """ Handles overlaps and conflicting information from the different knowledge bases. The 
+        final data is uploaded into a final_publications table on the database.
     """
     # Pull data from output_publications table and store in publications dataframe
     sql_helper.mysql_connect()

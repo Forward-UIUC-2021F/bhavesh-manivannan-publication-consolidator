@@ -1,6 +1,6 @@
 """
 This module is the Distributed Crawler Management Module that performs scraping tasks from 
-existing knowledge bases (e.g. MAG, OAG) asynchronously through the user of workers and stores data 
+existing knowledge bases (e.g. OAG, Springer, Arxiv, etc.) asynchronously through the use of workers and stores data 
 into a unified database for the EducationToday website. The scraping tasks can be found in tasks.py
 """
 
@@ -14,6 +14,14 @@ import pandas as pd
 import consolidator
 
 def crawl(professor, university):
+    """ Performs scraping tasks from existing knowledge bases. The queried data is stored in a temporary
+    output_publications SQL table. It is then consolidated.
+
+    Args:
+        professor (str): Name of professor
+        university (str): Name of university
+    """
+
     # Create Output Table
     sql_helper.mysql_connect()
     sql_helper.connection.cursor().execute("DROP TABLE IF EXISTS output_publications")
