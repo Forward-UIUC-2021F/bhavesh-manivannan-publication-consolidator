@@ -4,6 +4,7 @@ This program extracts professor and publication data from Microsoft Open Academi
 import json
 import pandas as pd
 import sql_helper
+import re
 
 def crawl(professor, university):
     """Crawls OAG knowledge base for publications associated with the professor from the specified university.
@@ -17,16 +18,35 @@ def crawl(professor, university):
     last_name = professor.split(" ")[1]
     
     sql_helper.mysql_connect()
-
     query = """
         SELECT title, abstract, doi, citations, authors
-        FROM bm12_publications.author_data as ad 
-        INNER JOIN bm12_publications.publication_author as pa ON ad.id = pa.author_id
-        INNER JOIN bm12_publications.publication_data as pd ON pa.publication_id = pd.id
-        WHERE (UPPER(name) like UPPER('%""" + first_name + "%') AND UPPER(name) like UPPER('%" +  last_name + "%') AND UPPER(org) like UPPER('%" +  university + "%')); """
-
+        FROM bm12_publications.publication_data as pd 
+        WHERE (UPPER(authors) like UPPER('%""" + first_name + "%') AND UPPER(authors) like UPPER('%" +  last_name + "%')); """
     publications = sql_helper.run_query(query)
+
+    if publications.shape[0] > 0:
+        publications = clean_results(publications, professor)
+
     return publications
+
+def clean_results(publications, professor):
+    """ This function cleans the SQL results for any potential incorrect publications that may have been retrieved. E.g. A publication 
+        does not contain the queried author.
+    Args:
+        publications (pandas dataframe): Data containing the publications' titles, authors, abstracts, and DOI's
+        professor (str): Name of professor
+    Returns:
+        result (pandas dataframe): Data containing the proper publications' titles, authors, abstracts, and DOI's
+    """
+    result = publications.copy()
+    for i, row in publications.iterrows():
+        authors = row["authors"]
+        my_regex = r"\b" + professor.lower() + r"\b"
+
+        if re.search(my_regex, authors.lower(), re.IGNORECASE) is None: 
+            result.drop(index=i, inplace = True)
+    
+    return result
 
 def test_OAG():
     """Testing suite for OAG crawler"""
@@ -38,3 +58,5 @@ def test_OAG():
     print("All OAG Crawler tests passed.")
 
 # test_OAG()
+# publications = crawl("Lawrence Rothfield", "")
+# print(publications)

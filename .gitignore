@@ -7,3 +7,5 @@ oag_test.txt
 oag_authors.txt
 *.txt
 *.zip
+run_author.py
+run_publication.py

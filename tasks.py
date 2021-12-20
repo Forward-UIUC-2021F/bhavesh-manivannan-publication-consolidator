@@ -1,4 +1,4 @@
-# we are importing Celery class from celery package
+# We are importing Celery class from celery package
 from celery import Celery
 import mysql.connector
 import sql_helper
@@ -16,10 +16,9 @@ import pandas as pd
 # Redis broker URL
 BROKER_URL = 'redis://localhost:6380/0'
 
-# We are creating an instance of Celery class by passing module name as Restaurant and broker as Redis.
-celery_app = Celery('Restaurant', broker=BROKER_URL)
+# We are creating an instance of Celery class by passing module name as Publication Crawler and broker as Redis.
+celery_app = Celery('Publication_Crawler', backend='rpc://', broker=BROKER_URL)
 
-# we are decorating cooking_task function with @celery_app.task decorator.
 # Functions which are decorated with @celery_app.task considered celery tasks.
 @celery_app.task
 def crawl_task(crawler, professor, university):
@@ -45,21 +44,21 @@ def crawl_task(crawler, professor, university):
         sql_helper.mysql_connect()
         res["citations"] = res["citations"].fillna(0)
         res["citations"] = res["citations"].astype(int)
-        for x in range(1):
-            for index, row in res.iterrows():
-                timestamp = datetime.now()
-                citations = row["citations"]
-                if citations == "":
-                    citations = 0
+        for index, row in res.iterrows():
+            timestamp = datetime.now()
+            citations = row["citations"]
+            print(citations)
+            if citations == "" or citations is None:
+                citations = 0
 
-                else:
-                    citations = int(citations)
+            else:
+                citations = int(citations)
 
-                sql = "INSERT IGNORE INTO Output (timestamp, title, authors, abstract, doi, citations) VALUES (%s, %s, %s, %s, %s, %s)"
-                val = (timestamp, row["title"], row["authors"], row["abstract"], row["doi"], citations)
-                sql_helper.connection.cursor().execute(sql, val)
+            sql = "INSERT IGNORE INTO output_publications (timestamp, title, authors, abstract, doi, citations, knowledge_base) VALUES (%s, %s, %s, %s, %s, %s, %s)"
+            val = (timestamp, row["title"], row["authors"], row["abstract"], row["doi"], citations, crawler.split("crawl_")[1])
+            sql_helper.connection.cursor().execute(sql, val)
 
-                # Connection is not autocommit by default. So you must commit to save your changes.
-                sql_helper.connection.commit()
+            # Connection is not autocommit by default. So you must commit to save your changes.
+            sql_helper.connection.commit()
 
     print("Done scraping  " + crawler + ": " + professor + ", " + university)

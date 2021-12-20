@@ -47,12 +47,11 @@ def publication_crawler(file):
     """
     # Initialization
     column_names = ["id", "title", "authors", "abstract", "doi", "citations"]
-    publications = pd.DataFrame(columns = column_names)
     sql_helper.mysql_connect()
 
     # Check for empty file path
     if file == "":
-        return publications
+        return
 
     # Open file
     file_papers = open(file, 'r')
@@ -95,30 +94,26 @@ def publication_crawler(file):
         else:
             temp_dict["doi"] = ""
             
-        if "citations" in pub_json:
+        if "n_citation" in pub_json:
             temp_dict["citations"] = pub_json["n_citation"]
         else:
             temp_dict["citations"] = ""
             
-        publications = publications.append(temp_dict, ignore_index=True)
+        # Insert into publications table
+        citations = temp_dict["citations"]
+        if citations == "" or citations is None:
+            citations = 0
 
-        for x in range(1): 
-            # Insert into publications table
-            citations = temp_dict["citations"]
-            if citations == "":
-                citations = 0
+        else:
+            citations = int(citations)
 
-            else:
-                citations = int(citations)
+        sql = "INSERT IGNORE INTO publication_data (id, title, authors, abstract, doi, citations) VALUES (%s, %s, %s, %s, %s, %s)"
+        val = (temp_dict["id"], temp_dict["title"], temp_dict["authors"], temp_dict["abstract"], temp_dict["doi"], citations)
+        sql_helper.connection.cursor().execute(sql, val)
 
-            sql = "INSERT IGNORE INTO publication_data (id, title, authors, abstract, doi, citations) VALUES (%s, %s, %s, %s, %s, %s)"
-            val = (temp_dict["id"], temp_dict["title"], temp_dict["authors"], temp_dict["abstract"], temp_dict["doi"], citations)
-            sql_helper.connection.cursor().execute(sql, val)
-
-            # Connection is not autocommit by default. So you must commit to save your changes.
-            sql_helper.connection.commit()
+        # Connection is not autocommit by default. So you must commit to save your changes.
+        sql_helper.connection.commit()
     
-    return publications
 
 def author_crawler(file):
     """Crawler helper function that crawls data for authors from a file
@@ -129,12 +124,11 @@ def author_crawler(file):
     """
     # Initialization
     column_names = ["id", "name", "org", "pubs"]
-    authors = pd.DataFrame(columns = column_names)
     sql_helper.mysql_connect()
 
     # Check for empty file path
     if file == "":
-        return authors
+        return
 
     # Open file
     file_papers = open(file, 'r')
@@ -175,29 +169,25 @@ def author_crawler(file):
 
         else:
             temp_dict["pubs"] = ""
-            
-        authors = authors.append(temp_dict, ignore_index=True)
 
-        for x in range(1):    
-            # Insert into authors table
-            if temp_dict["org"] != "":
-                sql = ("INSERT IGNORE INTO author_data (id, name, org) VALUES (%s, %s, %s)")
-                val = (temp_dict["id"], temp_dict["name"], temp_dict["org"][0])
-                sql_helper.connection.cursor().execute(sql, val)
-            else:
-                sql = ("INSERT IGNORE INTO author_data (id, name, org) VALUES (%s, %s, %s)")
-                val = (temp_dict["id"], temp_dict["name"], "")
-                sql_helper.connection.cursor().execute(sql, val)
+        # Insert into authors table
+        if temp_dict["org"] != "":
+            sql = ("INSERT IGNORE INTO author_data (id, name, org) VALUES (%s, %s, %s)")
+            val = (temp_dict["id"], temp_dict["name"], temp_dict["org"][0])
+            sql_helper.connection.cursor().execute(sql, val)
+        else:
+            sql = ("INSERT IGNORE INTO author_data (id, name, org) VALUES (%s, %s, %s)")
+            val = (temp_dict["id"], temp_dict["name"], "")
+            sql_helper.connection.cursor().execute(sql, val)
 
-            # Insert into publication_authors table
-            for x in range(len(temp_dict["pubs"])):
-                sql = ("INSERT IGNORE INTO publication_author (publication_id, author_id) VALUES (%s, %s)")
-                val = (temp_dict["pubs"][x]["i"], temp_dict["id"])
-                sql_helper.connection.cursor().execute(sql, val)
+        # Insert into publication_authors table
+        for x in range(len(temp_dict["pubs"])):
+            sql = ("INSERT IGNORE INTO publication_author (publication_id, author_id) VALUES (%s, %s)")
+            val = (temp_dict["pubs"][x]["i"], temp_dict["id"])
+            sql_helper.connection.cursor().execute(sql, val)
 
-            # Connection is not autocommit by default. So you must commit to save your changes.
-            sql_helper.connection.commit()
-    return authors
+        # Connection is not autocommit by default. So you must commit to save your changes.
+        sql_helper.connection.commit()
 
 def test_intermediary_database():
     publication_crawler("data/oag_test.txt")
@@ -209,9 +199,3 @@ def test_intermediary_database():
     print("All intermediary database tests passed.")
 
 # test_intermediary_database()
-# test_OAG()
-# publication_crawler("data/aminer_papers_1.txt")
-# author_crawler("data/aminer_authors_0.txt")
-# author_crawler("data/aminer_authors_1.txt")
-# publications = crawl("W Whitaker", "")
-# print(publications)

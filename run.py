@@ -1,2 +1,0 @@
-import intermediary_database
-intermediary_database.test_intermediary_database()
