@@ -26,7 +26,9 @@ def crawl(professor, university):
     column_names = ["title", "authors", "abstract", "doi", "citations"]
     publications = pd.DataFrame(columns = column_names)
     first_name = professor.split(" ")[0]
-    last_name = professor.split(" ")[1]
+    last_name = ""
+    if len(professor.split(" ")) > 1:
+        last_name = professor.split(" ")[1]
     
     # API Call to Arxiv API
     search = arxiv.Search(
@@ -105,4 +107,4 @@ def test_arxiv():
 
     print("All Arxiv Crawler tests passed.")
 
-test_arxiv()
+# test_arxiv()

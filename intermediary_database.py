@@ -7,15 +7,12 @@ import sql_helper
 
 def contains_professor(authors_list, professor):
     """Checks if the given professor is one of the authors of the publication.
-
     Args:
         authors_list (list): List of authors from OAG
         professor (str): Name of professor
-
     Returns:
         True (bool): Professor is one of the authors
         False (bool): Professor is not one of the authors
-
     """
     for x in authors_list: # authors_list example: "authors": [{"name": "John Smith", "id": "2404364408"}]"
         if "name" in x:
@@ -26,13 +23,10 @@ def contains_professor(authors_list, professor):
 
 def authors_to_string(authors_list):
     """Converts list of OAG authors into a comma separated string.
-
     Args:
         authors_list (list): List of authors from OAG
-
     Returns:
         temp (str): Comma separated string of all the creators
-
     """
     temp = ""
     for x in range(len(authors_list)):
@@ -48,20 +42,16 @@ def publication_crawler(file):
     """Crawler helper function that crawls data for publications
     Args:
         file (str): Path of file
-
     Returns:
         publications (pandas dataframe): Data containing the publications' titles, authors, abstracts, and DOI's
-
     """
     # Initialization
     column_names = ["id", "title", "authors", "abstract", "doi", "citations"]
-    publications = pd.DataFrame(columns = column_names)
-    sql_helper.open_ssh_tunnel()
     sql_helper.mysql_connect()
 
     # Check for empty file path
     if file == "":
-        return publications
+        return
 
     # Open file
     file_papers = open(file, 'r')
@@ -104,52 +94,41 @@ def publication_crawler(file):
         else:
             temp_dict["doi"] = ""
             
-        if "citations" in pub_json:
+        if "n_citation" in pub_json:
             temp_dict["citations"] = pub_json["n_citation"]
         else:
             temp_dict["citations"] = ""
             
-        publications = publications.append(temp_dict, ignore_index=True)
+        # Insert into publications table
+        citations = temp_dict["citations"]
+        if citations == "" or citations is None:
+            citations = 0
 
-        with sql_helper.connection.cursor() as cursor: 
-            # Insert into publications table
-            citations = temp_dict["citations"]
-            if citations == "":
-                citations = 0
+        else:
+            citations = int(citations)
 
-            else:
-                citations = int(citations)
+        sql = "INSERT IGNORE INTO publication_data (id, title, authors, abstract, doi, citations) VALUES (%s, %s, %s, %s, %s, %s)"
+        val = (temp_dict["id"], temp_dict["title"], temp_dict["authors"], temp_dict["abstract"], temp_dict["doi"], citations)
+        sql_helper.connection.cursor().execute(sql, val)
 
-            sql = "INSERT IGNORE INTO publication_data (id, title, authors, abstract, doi, citations) VALUES (%s, %s, %s, %s, %s, %s)"
-            val = (temp_dict["id"], temp_dict["title"], temp_dict["authors"], temp_dict["abstract"], temp_dict["doi"], citations)
-            cursor.execute(sql, val)
-
-            # Connection is not autocommit by default. So you must commit to save your changes.
-            sql_helper.connection.commit()
+        # Connection is not autocommit by default. So you must commit to save your changes.
+        sql_helper.connection.commit()
     
-    # sql_helper.mysql_disconnect()
-    # sql_helper.close_ssh_tunnel()
-    return publications
 
 def author_crawler(file):
     """Crawler helper function that crawls data for authors from a file
-
     Args:
         file (str): Path of file
-
     Returns:
         authors (pandas dataframe): Data containing the authors' id, name, and organization
-
     """
     # Initialization
     column_names = ["id", "name", "org", "pubs"]
-    authors = pd.DataFrame(columns = column_names)
-    sql_helper.open_ssh_tunnel()
     sql_helper.mysql_connect()
 
     # Check for empty file path
     if file == "":
-        return authors
+        return
 
     # Open file
     file_papers = open(file, 'r')
@@ -190,49 +169,37 @@ def author_crawler(file):
 
         else:
             temp_dict["pubs"] = ""
-            
-        authors = authors.append(temp_dict, ignore_index=True)
 
-        with sql_helper.connection.cursor() as cursor:     
-            # Insert into authors table
-            if temp_dict["org"] != "":
-                sql = ("INSERT IGNORE INTO author_data (id, name, org) VALUES (%s, %s, %s)")
-                val = (temp_dict["id"], temp_dict["name"], temp_dict["org"][0])
-                cursor.execute(sql, val)
-            else:
-                sql = ("INSERT IGNORE INTO author_data (id, name, org) VALUES (%s, %s, %s)")
-                val = (temp_dict["id"], temp_dict["name"], "")
-                cursor.execute(sql, val)
+        # Insert into authors table
+        if temp_dict["org"] != "":
+            sql = ("INSERT IGNORE INTO author_data (id, name, org) VALUES (%s, %s, %s)")
+            val = (temp_dict["id"], temp_dict["name"], temp_dict["org"][0])
+            sql_helper.connection.cursor().execute(sql, val)
+        else:
+            sql = ("INSERT IGNORE INTO author_data (id, name, org) VALUES (%s, %s, %s)")
+            val = (temp_dict["id"], temp_dict["name"], "")
+            sql_helper.connection.cursor().execute(sql, val)
 
-            # Insert into publication_authors table
-            for x in range(len(temp_dict["pubs"])):
-                sql = ("INSERT IGNORE INTO publication_author (publication_id, author_id) VALUES (%s, %s)")
-                val = (temp_dict["pubs"][x]["i"], temp_dict["id"])
-                cursor.execute(sql, val)
+        # Insert into publication_authors table
+        for x in range(len(temp_dict["pubs"])):
+            sql = ("INSERT IGNORE INTO publication_author (publication_id, author_id) VALUES (%s, %s)")
+            val = (temp_dict["pubs"][x]["i"], temp_dict["id"])
+            sql_helper.connection.cursor().execute(sql, val)
 
-            # Connection is not autocommit by default. So you must commit to save your changes.
-            sql_helper.connection.commit()
-
-    # sql_helper.mysql_disconnect()
-    # sql_helper.close_ssh_tunnel()
-    return authors
+        # Connection is not autocommit by default. So you must commit to save your changes.
+        sql_helper.connection.commit()
 
 def test_intermediary_database():
-    publication_crawler("data/oag_test.txt")
-    author_crawler("data/oag_authors.txt")
-    sql_helper.open_ssh_tunnel()
     sql_helper.mysql_connect()
-    df = sql_helper.run_query("SELECT * FROM publication_data;")
-    assert 'Data mining: concepts and techniques' in df.values
-    assert 'Jiawei Han' in df.values
+    first_name = "Jiawei"
+    last_name = "Han"
+    query = """
+        SELECT title, abstract, doi, citations, authors
+        FROM bm12_publications.publication_data as pd 
+        WHERE (UPPER(authors) like UPPER('%""" + first_name + "%') AND UPPER(authors) like UPPER('%" +  last_name + "%')); """
+    publications = sql_helper.run_query(query)
+    assert 'Survey of Biodata Analysis from a Data Mining Perspective' in publications.values
+    assert 'Jiawei Han' in publications.values
     print("All intermediary database tests passed.")
-    sql_helper.mysql_disconnect()
-    sql_helper.close_ssh_tunnel()
 
-test_intermediary_database()
-# test_OAG()
-# publication_crawler("data/aminer_papers_1.txt")
-# author_crawler("data/aminer_authors_0.txt")
-# author_crawler("data/aminer_authors_1.txt")
-# publications = crawl("W Whitaker", "")
-# print(publications)
+# test_intermediary_database()

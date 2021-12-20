@@ -119,4 +119,4 @@ def test_springer():
 
     print("All Springer Crawler tests passed.")
 
-test_springer()
+# test_springer()
