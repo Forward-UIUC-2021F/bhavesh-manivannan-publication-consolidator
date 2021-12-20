@@ -160,8 +160,9 @@ def consolidate():
   - final_publications database table
 
 
-## Demo video
-Make sure to include a video showing your module in action and how to use it in this section. Github Pages doesn't support this so I am unable to do this here. However, this can be done in your README.md files of your own repo. Follow instructions [here](https://stackoverflow.com/questions/4279611/how-to-embed-a-video-into-github-readme-md) of the accepted answer 
+## Demo Video (Click the Picture)
+[![Watch the video](https://img.youtube.com/vi/8J13fdo4Ez0/maxresdefault.jpg)](https://youtu.be/8J13fdo4Ez0)
+
 
 ## Algorithmic Design
 Given an input professor and their corresponding university, we first crawl the various knowledge bases for publication data associated with the given professor. The Distributed Crawler module performs all of these crawling tasks simultaneously and stores the output into the output_publications database table. 
