@@ -9,3 +9,4 @@ oag_authors.txt
 *.zip
 run_author.py
 run_publication.py
+*.pyc
