@@ -23,7 +23,7 @@ def crawl(professor, university):
         FROM bm12_publications.publication_data as pd 
         WHERE (UPPER(authors) like UPPER('%""" + first_name + "%') AND UPPER(authors) like UPPER('%" +  last_name + "%')); """
     publications = sql_helper.run_query(query)
-
+    
     if publications.shape[0] > 0:
         publications = clean_results(publications, professor)
 
@@ -57,4 +57,4 @@ def test_OAG():
 
     print("All OAG Crawler tests passed.")
 
-# test_OAG()
+test_OAG()
