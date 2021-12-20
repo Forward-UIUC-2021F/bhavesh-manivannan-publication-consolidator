@@ -52,11 +52,9 @@ def test_OAG():
     """Testing suite for OAG crawler"""
     publications = crawl("Jiawei Han", "University of Illinois")
 
-    assert "Data mining: concepts and techniques" in publications.values
+    assert "Survey of Biodata Analysis from a Data Mining Perspective" in publications.values
     assert "Jiawei Han" in publications.values
 
     print("All OAG Crawler tests passed.")
 
 # test_OAG()
-# publications = crawl("Lawrence Rothfield", "")
-# print(publications)

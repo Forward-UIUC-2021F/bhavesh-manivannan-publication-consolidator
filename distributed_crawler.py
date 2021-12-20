@@ -41,9 +41,30 @@ def crawl(professor, university):
     
     # All the tasks are done running, consolidate data in the output_publications database table and send to final_publications table.
     if (arxiv.status == "SUCCESS" and springer.status == "SUCCESS" and oag.status == "SUCCESS"):
-        print("All Tasks Done")
+        print("Scraping " + professor + ", " + university + " Done")
         consolidator.consolidate()
 
+def test_crawler():
+    # Have the Redis server running and make sure to truncate the final_publications table before performing these tests
 
-# crawl("Jiawei Han", "University of Illinois Urbana-Champaign")
-crawl("Pieter Abbeel", "University of California Berkeley") # Contains Duplicates from Springer + Arxiv
+    # First Crawler Test
+    crawl("Pieter Abbeel", "University of California Berkeley") # Contains Duplicates from Springer + Arxiv knowledge bases
+    sql_helper.mysql_connect()
+    df = sql_helper.run_query("SELECT * FROM final_publications;")
+    assert 'Enabling Robots to Communicate their Objectives' in df.values
+    
+    # Consolidation Test
+    df = sql_helper.run_query("SELECT * FROM output_publications;")
+    length = df.shape[0]
+    dfTwo = sql_helper.run_query("SELECT * FROM final_publications;")
+    lengthTwo = dfTwo.shape[0]
+    assert(lengthTwo < length)
+    print("All consolidator tests passed.")
+    
+    # Second Crawler Test
+    crawl("Jiawei Han", "University of Illinois Urbana-Champaign")
+    df = sql_helper.run_query("SELECT * FROM final_publications;")
+    assert 'Compilation-Based List Processing in Deductive Databases' in df.values
+    print("All crawler tests passed.")
+
+# test_crawler()

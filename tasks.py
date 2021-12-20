@@ -23,13 +23,12 @@ celery_app = Celery('Publication_Crawler', backend='rpc://', broker=BROKER_URL)
 @celery_app.task
 def crawl_task(crawler, professor, university):
     print("Started scraping " + crawler + ": " + professor + ", " + university)
-
     res = None
 
     if crawler == "crawl_arxiv":
         res = crawl_arxiv.crawl(professor, university)
         
-    elif crawler == "crawl_OAG":
+    elif crawler == "crawl_oag":
         res = crawl_OAG.crawl(professor, university)
 
     elif crawler == "crawl_springer":
@@ -47,7 +46,6 @@ def crawl_task(crawler, professor, university):
         for index, row in res.iterrows():
             timestamp = datetime.now()
             citations = row["citations"]
-            print(citations)
             if citations == "" or citations is None:
                 citations = 0
 

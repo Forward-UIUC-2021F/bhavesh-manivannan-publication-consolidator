@@ -190,12 +190,16 @@ def author_crawler(file):
         sql_helper.connection.commit()
 
 def test_intermediary_database():
-    publication_crawler("data/oag_test.txt")
-    author_crawler("data/oag_authors.txt")
     sql_helper.mysql_connect()
-    df = sql_helper.run_query("SELECT * FROM publication_data;")
-    assert 'Data mining: concepts and techniques' in df.values
-    assert 'Jiawei Han' in df.values
+    first_name = "Jiawei"
+    last_name = "Han"
+    query = """
+        SELECT title, abstract, doi, citations, authors
+        FROM bm12_publications.publication_data as pd 
+        WHERE (UPPER(authors) like UPPER('%""" + first_name + "%') AND UPPER(authors) like UPPER('%" +  last_name + "%')); """
+    publications = sql_helper.run_query(query)
+    assert 'Survey of Biodata Analysis from a Data Mining Perspective' in publications.values
+    assert 'Jiawei Han' in publications.values
     print("All intermediary database tests passed.")
 
 # test_intermediary_database()

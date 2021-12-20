@@ -52,20 +52,24 @@ def consolidate():
             temp_dict["title"] = current["title"].values[0]
 
             # Check if authors list is longer
-            if (len(temp_dict["authors"]) < len(current["authors"].values[0])):
+            if temp_dict["authors"] is not None and current["authors"].values[0] is not None and len(temp_dict["authors"]) < len(current["authors"].values[0]):
                 temp_dict["authors"]  = current["authors"].values[0]
+                temp_dict["knowledge_base"] = current["knowledge_base"].values[0]
 
             # Check if abstract is longer
-            if (len(temp_dict["abstract"]) < len(current["abstract"].values[0])):
+            if temp_dict["abstract"] is not None and current["abstract"].values[0] is not None and len(temp_dict["abstract"]) < len(current["abstract"].values[0]):
                 temp_dict["abstract"]  = current["abstract"].values[0]
-        
+                temp_dict["knowledge_base"] = current["knowledge_base"].values[0]
+
             # Check if doi is longer
-            if (len(temp_dict["doi"]) < len(current["doi"].values[0])):
+            if temp_dict["doi"] is not None and current["doi"].values[0] is not None and len(temp_dict["doi"]) < len(current["doi"].values[0]):
                 temp_dict["doi"] = current["doi"].values[0]
+                temp_dict["knowledge_base"] = current["knowledge_base"].values[0]
 
             # Check if number of citations is greater
-            if (int(temp_dict["citations"]) < int(current["citations"].values[0])):
+            if temp_dict["citations"] is not None and current["citations"].values[0] is not None and int(temp_dict["citations"]) < int(current["citations"].values[0]):
                 temp_dict["citations"] = current["citations"].values[0]
+                temp_dict["knowledge_base"] = current["knowledge_base"].values[0]
 
             # Delete the row corresponding to the index from the results dataframe
             result = result[result.id != current["id"].values[0]]
@@ -73,7 +77,7 @@ def consolidate():
         
         result = result.append(temp_dict, ignore_index=True)
 
-    # Remove null rows
+    # Convert Null rows to Python NoneType
     result = result.where((pd.notnull(result)), None)
 
     # Send final data in result dataframe to a final_publications table that have titles as the primary key.
@@ -86,10 +90,3 @@ def consolidate():
 
             # Connection is not autocommit by default. So you must commit to save your changes.
             sql_helper.connection.commit()
-
-def test_consolidator():
-    """Testing suite for consolidator"""
-
-    print("All consolidator tests passed.")
-
-# test_consolidator()
