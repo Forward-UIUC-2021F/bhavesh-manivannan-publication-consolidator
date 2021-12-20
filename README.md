@@ -4,7 +4,7 @@
 
 This module aggregates information from scraping tasks and from existing knowledge bases (e.g. MAG, OAG) into a unified database for the EducationToday website.
 
-This module includes the crawlers for the Arxiv, Google Scholar, Springer, and OAG (MAG + Aminer) knowledge bases. Each crawler is in a separate file and can be run by utilizing the crawl(professor, university) function. The consolidator.py file contains a centralized consolidate(professor, university) method which runs all the crawlers to build a single publications dataframe containing all of the publications for the inputted professor that is from the inputted university. Each file also contains unit tests that can be run to verify that nothing broke during potential API or knowledge base updates.
+This module includes the crawlers for the Arxiv, Google Scholar, Springer, and OAG (MAG + Aminer) knowledge bases. Each crawler is in a separate file and can be run by utilizing the crawl(professor, university) function. Python Celery was used in order to run these crawler tasks asynchronously through th use of a distributed task queue located in distributed_crawler.py. The results of the distributed_crawler are stored on the output_publications table in the MySQL database. The consolidator.py file contains a consolidate method which handles overlaps and conflicting information from the different knowledge bases and outputs this data to build a final_publications database table. Each file also contains unit tests that can be run to verify that nothing broke during potential API or knowledge base updates.
 
 *Note that this module does not handle ranking or keyword assignment related data. It only handles core data: descriptive data of each entity (e.g. research position of an author, number of citations for a publication) and core linking relations between each entity (e.g. current institution of professors).*
 
@@ -109,11 +109,11 @@ def crawl_oag()/crawl_gscholar()/crawl_arxiv()/crawl_springer():
 ### Module Storing Latest Version of Microsoft Open Academic Graph on Intermediary SQL Database: 
 ```
 def store_publications(file):
-  # Crawler helper function that crawls data for publications
+  # Helper function that stores OAG publication data in publication_data SQL Table.
   ...
 
 def store_authors(file):
-  # Crawler helper function that crawls data for authors from a file
+  # Helper function that stores OAG author data in author_data SQL Table.
   ...
 ```
 - Input 
