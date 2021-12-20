@@ -1,8 +1,12 @@
+"""
+This file contains helper functions for connecting to MySQL servers and running queries.
+"""
+
 import pandas as pd
 import mysql.connector
 
 def mysql_connect():
-    """Connect to a MySQL server using the SSH tunnel connection
+    """Connect to a MySQL server.
     
     Returns: 
       connection: Global MySQL database connection

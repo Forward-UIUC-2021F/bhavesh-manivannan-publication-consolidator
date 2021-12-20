@@ -14,7 +14,7 @@ import pandas as pd
 import consolidator
 
 def crawl(professor, university):
-    """ Performs scraping tasks from existing knowledge bases. The queried data is stored in a temporary
+    """ Performs scraping tasks asynchronously from existing knowledge bases. The queried data is stored in a temporary
     output_publications SQL table. It is then consolidated.
 
     Args:

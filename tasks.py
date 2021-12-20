@@ -1,4 +1,5 @@
-# We are importing Celery class from celery package
+# This files contains the Celery crawl_task that will run asynchronously.
+
 from celery import Celery
 import mysql.connector
 import sql_helper
@@ -25,6 +26,7 @@ def crawl_task(crawler, professor, university):
     print("Started scraping " + crawler + ": " + professor + ", " + university)
     res = None
 
+    # Call each crawler
     if crawler == "crawl_arxiv":
         res = crawl_arxiv.crawl(professor, university)
         
@@ -43,6 +45,8 @@ def crawl_task(crawler, professor, university):
         sql_helper.mysql_connect()
         res["citations"] = res["citations"].fillna(0)
         res["citations"] = res["citations"].astype(int)
+
+        # Iterate through res dataframe and insert data into output_publications database table.
         for index, row in res.iterrows():
             timestamp = datetime.now()
             citations = row["citations"]

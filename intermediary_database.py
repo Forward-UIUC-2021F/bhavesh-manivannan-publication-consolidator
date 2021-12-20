@@ -1,5 +1,5 @@
 """ 
-This program extracts professor and publication data from Microsoft Open Academic Graph (OAG) Knowledge Base.
+This program extracts professor and publication data from Microsoft Open Academic Graph (OAG) Knowledge Base files.
 """ 
 import json
 import pandas as pd
@@ -38,9 +38,8 @@ def authors_to_string(authors_list):
             temp += ", "
     return temp
 
-def publication_crawler(file):
-    """Crawler helper function that crawls data for publications.
-    Updates publication_data SQL Table
+def store_publications(file):
+    """ Helper function that stores OAG publication data in publication_data SQL Table.
 
     Args:
         file (str): Path of file
@@ -116,9 +115,8 @@ def publication_crawler(file):
         sql_helper.connection.commit()
     
 
-def author_crawler(file):
-    """Crawler helper function that crawls data for authors from a file. 
-    Updates author_data and publication_author SQL tables.
+def store_authors(file):
+    """ Helper function that stores OAG author data in author_data SQL Table.
 
     Args:
         file (str): Path of file
