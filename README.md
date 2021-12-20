@@ -174,7 +174,10 @@ Once the publication data is crawled, it is passed into the Consolidation Module
 ## Issues and Future Work
 * Fix the Google Scholar Crawler by creating a reverse proxy to avoid being flagged as malicious activity by Google.
 * Optimize SQL queries to pull from the large OAG database tables.
+* OAG crawler does not use the institution name due to large query time.
 * Handle edge cases in the crawl_OAG.py file such as middle initials of professors.
+* Allowing professors to be crawled asynchronously as well. Note: Need to create unique output_publications tables for each professor.
+* Handle edge cases for consolidation such as punctuation at the end of publication titles.
 
 ## References: 
 * Arxiv: https://arxiv.org/help/api
